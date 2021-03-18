@@ -1,10 +1,10 @@
 #ifndef LLARP_DHT_TXHOLDER
 #define LLARP_DHT_TXHOLDER
 
-#include <dht/tx.hpp>
-#include <dht/txowner.hpp>
-#include <util/time.hpp>
-#include <util/status.hpp>
+#include "tx.hpp"
+#include "txowner.hpp"
+#include <llarp/util/time.hpp>
+#include <llarp/util/status.hpp>
 
 #include <memory>
 #include <unordered_map>
@@ -37,8 +37,8 @@ namespace llarp
             tx.end(),
             std::back_inserter(txObjs),
             [](const auto& item) -> util::StatusObject {
-              return util::StatusObject{{"owner", item.first.ExtractStatus()},
-                                        {"tx", item.second->ExtractStatus()}};
+              return util::StatusObject{
+                  {"owner", item.first.ExtractStatus()}, {"tx", item.second->ExtractStatus()}};
             });
         obj["tx"] = txObjs;
         std::transform(
@@ -46,8 +46,8 @@ namespace llarp
             timeouts.end(),
             std::back_inserter(timeoutsObjs),
             [](const auto& item) -> util::StatusObject {
-              return util::StatusObject{{"time", to_json(item.second)},
-                                        {"target", item.first.ExtractStatus()}};
+              return util::StatusObject{
+                  {"time", to_json(item.second)}, {"target", item.first.ExtractStatus()}};
             });
         obj["timeouts"] = timeoutsObjs;
         std::transform(
@@ -55,8 +55,9 @@ namespace llarp
             waiting.end(),
             std::back_inserter(waitingObjs),
             [](const auto& item) -> util::StatusObject {
-              return util::StatusObject{{"target", item.first.ExtractStatus()},
-                                        {"whoasked", item.second.ExtractStatus()}};
+              return util::StatusObject{
+                  {"target", item.first.ExtractStatus()},
+                  {"whoasked", item.second.ExtractStatus()}};
             });
         obj["waiting"] = waitingObjs;
         return obj;

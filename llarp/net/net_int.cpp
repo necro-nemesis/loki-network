@@ -1,9 +1,30 @@
-#include <net/net_int.hpp>
-#include <net/ip.hpp>
+#include "net_int.hpp"
+#include "ip.hpp"
 #include <string>
 
 namespace llarp
 {
+  template <>
+  huint32_t
+  ToHost(nuint32_t n)
+  {
+    return xntohl(n);
+  }
+
+  template <>
+  nuint16_t
+  ToNet(huint16_t h)
+  {
+    return xhtons(h);
+  }
+
+  template <>
+  nuint32_t
+  ToNet(huint32_t h)
+  {
+    return xhtonl(h);
+  }
+
   template <>
   void
   huint32_t::ToV6(V6Container& c)

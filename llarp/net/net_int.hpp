@@ -1,5 +1,4 @@
-#ifndef LLARP_NET_INT_HPP
-#define LLARP_NET_INT_HPP
+#pragma once
 
 // for addrinfo
 #ifndef _WIN32
@@ -12,11 +11,11 @@
 #define inet_aton(x, y) inet_pton(AF_INET, x, y)
 #endif
 
-#include <net/net.h>
+#include "net.h"
 
 #include <cstdlib>  // for itoa
 #include <iostream>
-#include <util/endian.hpp>
+#include <llarp/util/endian.hpp>
 #include <vector>
 
 #include "uint128.hpp"
@@ -28,7 +27,8 @@ namespace llarp
   {
     UInt_t h;
 
-    constexpr huint_t operator&(huint_t x) const
+    constexpr huint_t
+    operator&(huint_t x) const
     {
       return huint_t{UInt_t{h & x.h}};
     }
@@ -129,7 +129,8 @@ namespace llarp
   {
     UInt_t n;
 
-    constexpr nuint_t operator&(nuint_t x) const
+    constexpr nuint_t
+    operator&(nuint_t x) const
     {
       return nuint_t{UInt_t(n & x.n)};
     }
@@ -218,6 +219,15 @@ namespace llarp
   {
     return huint16_t{ntohs(x.n)};
   }
+
+  template <typename UInt_t>
+  huint_t<UInt_t>
+  ToHost(nuint_t<UInt_t> h);
+
+  template <typename UInt_t>
+  nuint_t<UInt_t>
+  ToNet(huint_t<UInt_t> h);
+
 }  // namespace llarp
 
 namespace std
@@ -242,5 +252,3 @@ namespace std
     }
   };
 }  // namespace std
-
-#endif

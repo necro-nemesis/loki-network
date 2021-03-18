@@ -1,16 +1,16 @@
-#include <tooling/hive_context.hpp>
+#include "hive_context.hpp"
 
-#include <tooling/hive_router.hpp>
+#include "hive_router.hpp"
 
 namespace tooling
 {
   HiveContext::HiveContext(RouterHive* hive) : m_hive(hive)
   {}
 
-  std::unique_ptr<llarp::AbstractRouter>
-  HiveContext::makeRouter(llarp_ev_loop_ptr netloop, std::shared_ptr<llarp::Logic> logic)
+  std::shared_ptr<llarp::AbstractRouter>
+  HiveContext::makeRouter(const llarp::EventLoop_ptr& loop)
   {
-    return std::make_unique<HiveRouter>(netloop, logic, m_hive);
+    return std::make_shared<HiveRouter>(loop, makeVPNPlatform(), m_hive);
   }
 
   HiveRouter*

@@ -1,12 +1,12 @@
-#include <router/outbound_message_handler.hpp>
+#include "outbound_message_handler.hpp"
 
-#include <messages/link_message.hpp>
-#include <router/i_outbound_session_maker.hpp>
-#include <router/i_rc_lookup_handler.hpp>
-#include <link/i_link_manager.hpp>
-#include <constants/link_layer.hpp>
-#include <util/meta/memfn.hpp>
-#include <util/status.hpp>
+#include <llarp/messages/link_message.hpp>
+#include "i_outbound_session_maker.hpp"
+#include "i_rc_lookup_handler.hpp"
+#include <llarp/link/i_link_manager.hpp>
+#include <llarp/constants/link_layer.hpp>
+#include <llarp/util/meta/memfn.hpp>
+#include <llarp/util/status.hpp>
 
 #include <algorithm>
 #include <cstdlib>
@@ -100,24 +100,25 @@ namespace llarp
   util::StatusObject
   OutboundMessageHandler::ExtractStatus() const
   {
-    util::StatusObject status{"queueStats",
-                              {{"queued", m_queueStats.queued},
-                               {"dropped", m_queueStats.dropped},
-                               {"sent", m_queueStats.sent},
-                               {"queueWatermark", m_queueStats.queueWatermark},
-                               {"perTickMax", m_queueStats.perTickMax},
-                               {"numTicks", m_queueStats.numTicks}}};
+    util::StatusObject status{
+        "queueStats",
+        {{"queued", m_queueStats.queued},
+         {"dropped", m_queueStats.dropped},
+         {"sent", m_queueStats.sent},
+         {"queueWatermark", m_queueStats.queueWatermark},
+         {"perTickMax", m_queueStats.perTickMax},
+         {"numTicks", m_queueStats.numTicks}}};
 
     return status;
   }
 
   void
   OutboundMessageHandler::Init(
-      ILinkManager* linkManager, I_RCLookupHandler* lookupHandler, std::shared_ptr<Logic> logic)
+      ILinkManager* linkManager, I_RCLookupHandler* lookupHandler, EventLoop_ptr loop)
   {
     _linkManager = linkManager;
     _lookupHandler = lookupHandler;
-    _logic = logic;
+    _loop = std::move(loop);
 
     outboundMessageQueues.emplace(zeroID, MessageQueue());
   }
@@ -183,10 +184,7 @@ namespace llarp
   OutboundMessageHandler::DoCallback(SendStatusHandler callback, SendStatus status)
   {
     if (callback)
-    {
-      auto f = std::bind(callback, status);
-      LogicCall(_logic, [self = this, f]() { self->m_Killer.TryAccess(f); });
-    }
+      _loop->call([f = std::move(callback), status] { f(status); });
   }
 
   void

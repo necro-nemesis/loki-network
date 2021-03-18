@@ -1,19 +1,19 @@
-#include <router_contact.hpp>
+#include "router_contact.hpp"
 
-#include <constants/version.hpp>
-#include <crypto/crypto.hpp>
-#include <net/net.hpp>
-#include <util/bencode.hpp>
-#include <util/buffer.hpp>
-#include <util/logging/logger.hpp>
-#include <util/mem.hpp>
-#include <util/printer.hpp>
-#include <util/time.hpp>
+#include "constants/version.hpp"
+#include "crypto/crypto.hpp"
+#include "net/net.hpp"
+#include "util/bencode.hpp"
+#include "util/buffer.hpp"
+#include "util/logging/logger.hpp"
+#include "util/mem.hpp"
+#include "util/printer.hpp"
+#include "util/time.hpp"
 
-#include <lokimq/bt_serialize.h>
+#include <oxenmq/bt_serialize.h>
 
 #include <fstream>
-#include <util/fs.hpp>
+#include "util/fs.hpp"
 
 namespace llarp
 {
@@ -217,10 +217,11 @@ namespace llarp
   util::StatusObject
   RouterContact::ExtractStatus() const
   {
-    util::StatusObject obj{{"lastUpdated", last_updated.count()},
-                           {"publicRouter", IsPublicRouter()},
-                           {"identity", pubkey.ToString()},
-                           {"addresses", addrs}};
+    util::StatusObject obj{
+        {"lastUpdated", last_updated.count()},
+        {"publicRouter", IsPublicRouter()},
+        {"identity", pubkey.ToString()},
+        {"addresses", addrs}};
 
     if (HasNick())
     {
@@ -250,7 +251,7 @@ namespace llarp
     try
     {
       std::string_view buf_view(reinterpret_cast<char*>(buf->cur), buf->size_left());
-      lokimq::bt_list_consumer btlist(buf_view);
+      oxenmq::bt_list_consumer btlist(buf_view);
 
       uint64_t outer_version = btlist.consume_integer<uint64_t>();
 
@@ -284,7 +285,7 @@ namespace llarp
   }
 
   bool
-  RouterContact::DecodeVersion_1(lokimq::bt_list_consumer& btlist)
+  RouterContact::DecodeVersion_1(oxenmq::bt_list_consumer& btlist)
   {
     auto signature_string = btlist.consume_string_view();
     signed_bt_dict = btlist.consume_dict_data();

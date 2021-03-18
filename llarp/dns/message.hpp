@@ -1,9 +1,8 @@
-#ifndef LLARP_DNS_MESSAGE_HPP
-#define LLARP_DNS_MESSAGE_HPP
+#pragma once
 
-#include <dns/serialize.hpp>
-#include <dns/rr.hpp>
-#include <dns/question.hpp>
+#include "serialize.hpp"
+#include "rr.hpp"
+#include "question.hpp"
 
 namespace llarp
 {
@@ -83,6 +82,10 @@ namespace llarp
       bool
       Decode(llarp_buffer_t* buf) override;
 
+      // Wrapper around Encode that encodes into a new buffer and returns it
+      [[nodiscard]] OwnedBuffer
+      ToBuffer() const;
+
       std::ostream&
       print(std::ostream& stream, int level, int spaces) const;
 
@@ -102,5 +105,3 @@ namespace llarp
     }
   }  // namespace dns
 }  // namespace llarp
-
-#endif

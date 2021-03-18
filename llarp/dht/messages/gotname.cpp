@@ -1,8 +1,8 @@
-#include <dht/messages/gotname.hpp>
-#include <lokimq/bt_serialize.h>
-#include <dht/context.hpp>
-#include <router/abstractrouter.hpp>
-#include <path/path_context.hpp>
+#include "gotname.hpp"
+#include <oxenmq/bt_serialize.h>
+#include <llarp/dht/context.hpp>
+#include <llarp/router/abstractrouter.hpp>
+#include <llarp/path/path_context.hpp>
 
 namespace llarp::dht
 {
@@ -19,8 +19,8 @@ namespace llarp::dht
   GotNameMessage::BEncode(llarp_buffer_t* buf) const
   {
     const std::string nonce((const char*)result.nonce.data(), result.nonce.size());
-    const auto data = lokimq::bt_serialize(
-        lokimq::bt_dict{{"A", "M"sv}, {"D", result.ciphertext}, {"N", nonce}, {"T", TxID}});
+    const auto data = oxenmq::bt_serialize(
+        oxenmq::bt_dict{{"A", "M"sv}, {"D", result.ciphertext}, {"N", nonce}, {"T", TxID}});
     return buf->write(data.begin(), data.end());
   }
 

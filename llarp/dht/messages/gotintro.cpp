@@ -1,12 +1,12 @@
-#include <dht/messages/gotintro.hpp>
+#include "gotintro.hpp"
 
-#include <service/intro.hpp>
-#include <dht/context.hpp>
+#include <llarp/service/intro.hpp>
+#include <llarp/dht/context.hpp>
 #include <memory>
-#include <path/path_context.hpp>
-#include <router/abstractrouter.hpp>
-#include <routing/dht_message.hpp>
-#include <tooling/dht_event.hpp>
+#include <llarp/path/path_context.hpp>
+#include <llarp/router/abstractrouter.hpp>
+#include <llarp/routing/dht_message.hpp>
+#include <llarp/tooling/dht_event.hpp>
 #include <utility>
 
 namespace llarp
@@ -63,7 +63,7 @@ namespace llarp
     bool
     RelayedGotIntroMessage::HandleMessage(
         llarp_dht_context* ctx,
-        __attribute__((unused)) std::vector<std::unique_ptr<IMessage>>& replies) const
+        [[maybe_unused]] std::vector<std::unique_ptr<IMessage>>& replies) const
     {
       // TODO: implement me better?
       auto pathset = ctx->impl->GetRouter()->pathContext().GetLocalPathSet(pathID);

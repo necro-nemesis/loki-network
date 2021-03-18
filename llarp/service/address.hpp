@@ -1,9 +1,8 @@
-#ifndef LLARP_SERVICE_ADDRESS_HPP
-#define LLARP_SERVICE_ADDRESS_HPP
+#pragma once
 
-#include <dht/key.hpp>
-#include <router_id.hpp>
-#include <util/aligned.hpp>
+#include <llarp/dht/key.hpp>
+#include <llarp/router_id.hpp>
+#include <llarp/util/aligned.hpp>
 
 #include <functional>
 #include <numeric>
@@ -104,4 +103,15 @@ namespace llarp
   }  // namespace service
 }  // namespace llarp
 
-#endif
+namespace std
+{
+  template <>
+  struct hash<llarp::service::Address>
+  {
+    size_t
+    operator()(const llarp::service::Address& addr) const
+    {
+      return llarp::service::Address::Hash{}(addr);
+    }
+  };
+}  // namespace std

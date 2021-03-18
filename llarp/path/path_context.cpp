@@ -1,9 +1,9 @@
-#include <path/path_context.hpp>
+#include "path_context.hpp"
 
-#include <messages/relay_commit.hpp>
-#include <path/path.hpp>
-#include <router/abstractrouter.hpp>
-#include <router/i_outbound_message_handler.hpp>
+#include <llarp/messages/relay_commit.hpp>
+#include "path.hpp"
+#include <llarp/router/abstractrouter.hpp>
+#include <llarp/router/i_outbound_message_handler.hpp>
 
 namespace llarp
 {
@@ -42,10 +42,10 @@ namespace llarp
 #endif
     }
 
-    std::shared_ptr<Logic>
-    PathContext::logic()
+    const EventLoop_ptr&
+    PathContext::loop()
     {
-      return m_Router->logic();
+      return m_Router->loop();
     }
 
     const SecretKey&
@@ -320,7 +320,6 @@ namespace llarp
         {
           if (itr->second->Expired(now))
           {
-            itr->second->m_PathSet->RemovePath(itr->second);
             itr = map.erase(itr);
           }
           else

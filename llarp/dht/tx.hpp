@@ -1,10 +1,10 @@
 #ifndef LLARP_DHT_TX
 #define LLARP_DHT_TX
 
-#include <dht/key.hpp>
-#include <dht/txowner.hpp>
-#include <util/logging/logger.hpp>
-#include <util/status.hpp>
+#include "key.hpp"
+#include "txowner.hpp"
+#include <llarp/util/logging/logger.hpp>
+#include <llarp/util/status.hpp>
 
 #include <set>
 #include <vector>
@@ -36,8 +36,8 @@ namespace llarp
       util::StatusObject
       ExtractStatus() const
       {
-        util::StatusObject obj{{"whoasked", whoasked.ExtractStatus()},
-                               {"target", target.ExtractStatus()}};
+        util::StatusObject obj{
+            {"whoasked", whoasked.ExtractStatus()}, {"target", target.ExtractStatus()}};
         std::vector<util::StatusObject> foundObjs;
         std::transform(
             valuesFound.begin(),

@@ -1,21 +1,20 @@
-#include <path/path.hpp>
+#include "path.hpp"
 
-#include <exit/exit_messages.hpp>
-#include <link/i_link_manager.hpp>
-#include <messages/discard.hpp>
-#include <messages/relay_commit.hpp>
-#include <messages/relay_status.hpp>
-#include <path/pathbuilder.hpp>
-#include <path/transit_hop.hpp>
-#include <profiling.hpp>
-#include <router/abstractrouter.hpp>
-#include <routing/dht_message.hpp>
-#include <routing/path_latency_message.hpp>
-#include <routing/transfer_traffic_message.hpp>
-#include <util/buffer.hpp>
-#include <util/endian.hpp>
-#include <util/thread/logic.hpp>
-#include <tooling/path_event.hpp>
+#include <llarp/exit/exit_messages.hpp>
+#include <llarp/link/i_link_manager.hpp>
+#include <llarp/messages/discard.hpp>
+#include <llarp/messages/relay_commit.hpp>
+#include <llarp/messages/relay_status.hpp>
+#include "pathbuilder.hpp"
+#include "transit_hop.hpp"
+#include <llarp/profiling.hpp>
+#include <llarp/router/abstractrouter.hpp>
+#include <llarp/routing/dht_message.hpp>
+#include <llarp/routing/path_latency_message.hpp>
+#include <llarp/routing/transfer_traffic_message.hpp>
+#include <llarp/util/buffer.hpp>
+#include <llarp/util/endian.hpp>
+#include <llarp/tooling/path_event.hpp>
 
 #include <deque>
 
@@ -174,8 +173,7 @@ namespace llarp
       if ((currentStatus & LR_StatusRecord::SUCCESS) == LR_StatusRecord::SUCCESS)
       {
         llarp::LogDebug("LR_Status message processed, path build successful");
-        auto self = shared_from_this();
-        LogicCall(r->logic(), [=]() { self->HandlePathConfirmMessage(r); });
+        r->loop()->call([r, self = shared_from_this()] { self->HandlePathConfirmMessage(r); });
       }
       else
       {
@@ -231,8 +229,8 @@ namespace llarp
         {
           llarp::LogDebug("Path build failed for an unspecified reason");
         }
-        auto self = shared_from_this();
-        LogicCall(r->logic(), [=]() { self->EnterState(ePathFailed, r->Now()); });
+        r->loop()->call(
+            [r, self = shared_from_this()]() { self->EnterState(ePathFailed, r->Now()); });
       }
 
       // TODO: meaningful return value?
@@ -278,10 +276,11 @@ namespace llarp
     util::StatusObject
     PathHopConfig::ExtractStatus() const
     {
-      util::StatusObject obj{{"lifetime", to_json(lifetime)},
-                             {"router", rc.pubkey.ToHex()},
-                             {"txid", txID.ToHex()},
-                             {"rxid", rxID.ToHex()}};
+      util::StatusObject obj{
+          {"lifetime", to_json(lifetime)},
+          {"router", rc.pubkey.ToHex()},
+          {"txid", txID.ToHex()},
+          {"rxid", rxID.ToHex()}};
       return obj;
     }
 
@@ -290,17 +289,18 @@ namespace llarp
     {
       auto now = llarp::time_now_ms();
 
-      util::StatusObject obj{{"intro", intro.ExtractStatus()},
-                             {"lastRecvMsg", to_json(m_LastRecvMessage)},
-                             {"lastLatencyTest", to_json(m_LastLatencyTestTime)},
-                             {"buildStarted", to_json(buildStarted)},
-                             {"expired", Expired(now)},
-                             {"expiresSoon", ExpiresSoon(now)},
-                             {"expiresAt", to_json(ExpireTime())},
-                             {"ready", IsReady()},
-                             {"txRateCurrent", m_LastTXRate},
-                             {"rxRateCurrent", m_LastRXRate},
-                             {"hasExit", SupportsAnyRoles(ePathRoleExit)}};
+      util::StatusObject obj{
+          {"intro", intro.ExtractStatus()},
+          {"lastRecvMsg", to_json(m_LastRecvMessage)},
+          {"lastLatencyTest", to_json(m_LastLatencyTestTime)},
+          {"buildStarted", to_json(buildStarted)},
+          {"expired", Expired(now)},
+          {"expiresSoon", ExpiresSoon(now)},
+          {"expiresAt", to_json(ExpireTime())},
+          {"ready", IsReady()},
+          {"txRateCurrent", m_LastTXRate},
+          {"rxRateCurrent", m_LastRXRate},
+          {"hasExit", SupportsAnyRoles(ePathRoleExit)}};
 
       std::vector<util::StatusObject> hopsObj;
       std::transform(
@@ -439,7 +439,7 @@ namespace llarp
         msg.pathid = TXID();
         ++idx;
       }
-      LogicCall(r->logic(), [self = shared_from_this(), data = std::move(sendmsgs), r]() {
+      r->loop()->call([self = shared_from_this(), data = std::move(sendmsgs), r]() mutable {
         self->HandleAllUpstream(std::move(data), r);
       });
     }
@@ -509,7 +509,7 @@ namespace llarp
         sendMsgs[idx].X = buf;
         ++idx;
       }
-      LogicCall(r->logic(), [self = shared_from_this(), msgs = std::move(sendMsgs), r]() {
+      r->loop()->call([self = shared_from_this(), msgs = std::move(sendMsgs), r]() mutable {
         self->HandleAllDownstream(std::move(msgs), r);
       });
     }

@@ -1,14 +1,13 @@
-#ifndef LLARP_RC_HPP
-#define LLARP_RC_HPP
+#pragma once
 
-#include <constants/version.hpp>
-#include <crypto/types.hpp>
-#include <net/address_info.hpp>
-#include <net/exit_info.hpp>
-#include <util/aligned.hpp>
-#include <util/bencode.hpp>
-#include <util/status.hpp>
-#include <router_version.hpp>
+#include "constants/version.hpp"
+#include "crypto/types.hpp"
+#include "net/address_info.hpp"
+#include "net/exit_info.hpp"
+#include "util/aligned.hpp"
+#include "util/bencode.hpp"
+#include "util/status.hpp"
+#include "router_version.hpp"
 
 #include <functional>
 #include <nlohmann/json.hpp>
@@ -17,10 +16,10 @@
 #define MAX_RC_SIZE (1024)
 #define NICKLEN (32)
 
-namespace lokimq
+namespace oxenmq
 {
   class bt_list_consumer;
-}  // namespace lokimq
+}  // namespace oxenmq
 
 namespace llarp
 {
@@ -230,7 +229,7 @@ namespace llarp
     DecodeVersion_0(llarp_buffer_t* buf);
 
     bool
-    DecodeVersion_1(lokimq::bt_list_consumer& btlist);
+    DecodeVersion_1(oxenmq::bt_list_consumer& btlist);
   };
 
   inline std::ostream&
@@ -241,5 +240,3 @@ namespace llarp
 
   using RouterLookupHandler = std::function<void(const std::vector<RouterContact>&)>;
 }  // namespace llarp
-
-#endif

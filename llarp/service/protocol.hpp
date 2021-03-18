@@ -1,18 +1,17 @@
-#ifndef LLARP_SERVICE_PROTOCOL_HPP
-#define LLARP_SERVICE_PROTOCOL_HPP
+#pragma once
 
-#include <crypto/encrypted.hpp>
-#include <crypto/types.hpp>
-#include <dht/message.hpp>
-#include <routing/message.hpp>
-#include <service/protocol_type.hpp>
-#include <service/identity.hpp>
-#include <service/info.hpp>
-#include <service/intro.hpp>
-#include <service/handler.hpp>
-#include <util/bencode.hpp>
-#include <util/time.hpp>
-#include <path/pathset.hpp>
+#include <llarp/crypto/encrypted.hpp>
+#include <llarp/crypto/types.hpp>
+#include <llarp/dht/message.hpp>
+#include <llarp/routing/message.hpp>
+#include "protocol_type.hpp"
+#include "identity.hpp"
+#include "info.hpp"
+#include "intro.hpp"
+#include "handler.hpp"
+#include <llarp/util/bencode.hpp>
+#include <llarp/util/time.hpp>
+#include <llarp/path/pathset.hpp>
 
 #include <vector>
 
@@ -20,8 +19,6 @@ struct llarp_threadpool;
 
 namespace llarp
 {
-  class Logic;
-
   namespace path
   {
     /// forward declare
@@ -127,10 +124,11 @@ namespace llarp
 
       bool
       AsyncDecryptAndVerify(
-          std::shared_ptr<Logic> logic,
+          EventLoop_ptr loop,
           path::Path_ptr fromPath,
           const Identity& localIdent,
-          Endpoint* handler) const;
+          Endpoint* handler,
+          std::function<void(std::shared_ptr<ProtocolMessage>)> hook = nullptr) const;
 
       bool
       DecryptPayloadInto(const SharedSecret& sharedkey, ProtocolMessage& into) const;
@@ -168,5 +166,3 @@ namespace llarp
     };
   }  // namespace service
 }  // namespace llarp
-
-#endif

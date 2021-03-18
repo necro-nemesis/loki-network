@@ -1,20 +1,21 @@
-#ifndef LLARP_CONFIG_HPP
-#define LLARP_CONFIG_HPP
+#pragma once
 
 #include <chrono>
-#include <crypto/types.hpp>
-#include <router_contact.hpp>
-#include <util/fs.hpp>
-#include <util/str.hpp>
-#include <config/ini.hpp>
-#include <config/definition.hpp>
-#include <constants/files.hpp>
-#include <net/ip_address.hpp>
-#include <net/net_int.hpp>
-#include <net/ip_range_map.hpp>
-#include <service/address.hpp>
-#include <service/auth.hpp>
-#include <dns/srv_data.hpp>
+#include <llarp/crypto/types.hpp>
+#include <llarp/router_contact.hpp>
+#include <llarp/util/fs.hpp>
+#include <llarp/util/str.hpp>
+#include "ini.hpp"
+#include "definition.hpp"
+#include <llarp/constants/files.hpp>
+#include <llarp/net/ip_address.hpp>
+#include <llarp/net/net_int.hpp>
+#include <llarp/net/ip_range_map.hpp>
+#include <llarp/service/address.hpp>
+#include <llarp/service/auth.hpp>
+#include <llarp/dns/srv_data.hpp>
+
+#include <llarp/router_contact.hpp>
 
 #include <cstdlib>
 #include <functional>
@@ -23,7 +24,7 @@
 #include <vector>
 #include <unordered_set>
 
-#include <lokimq/address.h>
+#include <oxenmq/address.h>
 
 namespace llarp
 {
@@ -67,6 +68,25 @@ namespace llarp
 
     void
     defineConfigOptions(ConfigDefinition& conf, const ConfigGenParameters& params);
+  };
+
+  /// config for path hop selection
+  struct PeerSelectionConfig
+  {
+    /// in our hops what netmask will we use for unique ips for hops
+    /// i.e. 32 for every hop unique ip, 24 unique /24 per hop, etc
+    ///
+    int m_UniqueHopsNetmaskSize;
+
+    /// set of countrys to exclude from path building (2 char country code)
+    std::unordered_set<std::string> m_ExcludeCountries;
+
+    void
+    defineConfigOptions(ConfigDefinition& conf, const ConfigGenParameters& params);
+
+    /// return true if this set of router contacts is acceptable against this config
+    bool
+    Acceptable(const std::set<RouterContact>& hops) const;
   };
 
   struct NetworkConfig
@@ -157,7 +177,7 @@ namespace llarp
   {
     bool whitelistRouters = false;
     fs::path ident_keyfile;
-    lokimq::address lokidRPCAddr;
+    oxenmq::address lokidRPCAddr;
 
     void
     defineConfigOptions(ConfigDefinition& conf, const ConfigGenParameters& params);
@@ -189,6 +209,7 @@ namespace llarp
 
     RouterConfig router;
     NetworkConfig network;
+    PeerSelectionConfig paths;
     ConnectConfig connect;
     DnsConfig dns;
     LinksConfig links;
@@ -224,6 +245,9 @@ namespace llarp
     void
     Override(std::string section, std::string key, std::string value);
 
+    void
+    AddDefault(std::string section, std::string key, std::string value);
+
    private:
     /// Load (initialize) a default config.
     ///
@@ -242,6 +266,7 @@ namespace llarp
     void
     LoadOverrides();
 
+    std::vector<std::array<std::string, 3>> m_Additional;
     ConfigParser m_Parser;
     const fs::path m_DataDir;
   };
@@ -250,5 +275,3 @@ namespace llarp
   ensureConfig(fs::path dataDir, fs::path confFile, bool overwrite, bool asRouter);
 
 }  // namespace llarp
-
-#endif

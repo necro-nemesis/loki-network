@@ -1,13 +1,12 @@
-#ifndef LLARP_SERVICE_SENDCONTEXT_HPP
-#define LLARP_SERVICE_SENDCONTEXT_HPP
+#pragma once
 
-#include <path/pathset.hpp>
-#include <routing/path_transfer_message.hpp>
-#include <service/intro.hpp>
-#include <service/protocol.hpp>
-#include <util/buffer.hpp>
-#include <util/types.hpp>
-#include <util/thread/queue.hpp>
+#include <llarp/path/pathset.hpp>
+#include <llarp/routing/path_transfer_message.hpp>
+#include "intro.hpp"
+#include "protocol.hpp"
+#include <llarp/util/buffer.hpp>
+#include <llarp/util/types.hpp>
+#include <llarp/util/thread/queue.hpp>
 
 #include <deque>
 
@@ -52,6 +51,8 @@ namespace llarp
       using SendEvent_t = std::pair<Msg_ptr, path::Path_ptr>;
       thread::Queue<SendEvent_t> m_SendQueue;
 
+      std::function<void(AuthResult)> authResultListener;
+
       virtual bool
       ShiftIntroduction(bool rebuild = true)
       {
@@ -65,6 +66,9 @@ namespace llarp
       virtual bool
       MarkCurrentIntroBad(llarp_time_t now) = 0;
 
+      void
+      AsyncSendAuth(std::function<void(AuthResult)> replyHandler);
+
      private:
       void
       EncryptAndSendTo(const llarp_buffer_t& payload, ProtocolType t);
@@ -74,5 +78,3 @@ namespace llarp
     };
   }  // namespace service
 }  // namespace llarp
-
-#endif

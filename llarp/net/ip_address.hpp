@@ -1,12 +1,12 @@
 #pragma once
 
-#include <net/sock_addr.hpp>
+#include "sock_addr.hpp"
 
 #include <optional>
 #include <string_view>
 #include <string>
 
-#include <net/net_int.hpp>
+#include "net_int.hpp"
 
 namespace llarp
 {
@@ -125,6 +125,9 @@ namespace llarp
 
     huint32_t
     toIP() const;
+
+    huint128_t
+    toIP6() const;
 
     // TODO: other utility functions left over from Addr which may be useful
     // IsBogon() const;

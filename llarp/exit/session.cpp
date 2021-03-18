@@ -1,11 +1,11 @@
-#include <exit/session.hpp>
+#include "session.hpp"
 
-#include <crypto/crypto.hpp>
-#include <nodedb.hpp>
-#include <path/path_context.hpp>
-#include <path/path.hpp>
-#include <router/abstractrouter.hpp>
-#include <util/meta/memfn.hpp>
+#include <llarp/crypto/crypto.hpp>
+#include <llarp/nodedb.hpp>
+#include <llarp/path/path_context.hpp>
+#include <llarp/path/path.hpp>
+#include <llarp/router/abstractrouter.hpp>
+#include <llarp/util/meta/memfn.hpp>
 #include <utility>
 
 namespace llarp
@@ -70,30 +70,10 @@ namespace llarp
       m_SnodeBlacklist.insert(std::move(snode));
     }
 
-    bool
-    BaseSession::SelectHop(
-        llarp_nodedb* db,
-        const std::set<RouterID>& prev,
-        RouterContact& cur,
-        size_t hop,
-        llarp::path::PathRole roles)
+    std::optional<std::vector<RouterContact>>
+    BaseSession::GetHopsForBuild()
     {
-      std::set<RouterID> exclude = prev;
-      for (const auto& snode : m_SnodeBlacklist)
-      {
-        if (snode != m_ExitRouter)
-          exclude.insert(snode);
-      }
-      exclude.insert(m_ExitRouter);
-      if (hop == numHops - 1)
-      {
-        if (db->Get(m_ExitRouter, cur))
-          return true;
-        m_router->LookupRouter(m_ExitRouter, nullptr);
-        return false;
-      }
-
-      return path::Builder::SelectHop(db, exclude, cur, hop, roles);
+      return GetHopsAlignedToForBuild(m_ExitRouter);
     }
 
     bool
@@ -306,9 +286,8 @@ namespace llarp
         if (numHops == 1)
         {
           auto r = m_router;
-          RouterContact rc;
-          if (r->nodedb()->Get(m_ExitRouter, rc))
-            r->TryConnectAsync(rc, 5);
+          if (const auto maybe = r->nodedb()->Get(m_ExitRouter); maybe.has_value())
+            r->TryConnectAsync(*maybe, 5);
           else
             r->LookupRouter(m_ExitRouter, [r](const std::vector<RouterContact>& results) {
               if (results.size())

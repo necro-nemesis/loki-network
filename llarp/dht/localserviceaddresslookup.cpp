@@ -1,11 +1,11 @@
-#include <dht/localserviceaddresslookup.hpp>
+#include "localserviceaddresslookup.hpp"
 
-#include <dht/context.hpp>
-#include <dht/messages/gotintro.hpp>
-#include <path/path_context.hpp>
-#include <router/abstractrouter.hpp>
-#include <routing/dht_message.hpp>
-#include <util/logging/logger.hpp>
+#include "context.hpp"
+#include <llarp/dht/messages/gotintro.hpp>
+#include <llarp/path/path_context.hpp>
+#include <llarp/router/abstractrouter.hpp>
+#include <llarp/routing/dht_message.hpp>
+#include <llarp/util/logging/logger.hpp>
 
 namespace llarp
 {
@@ -17,7 +17,7 @@ namespace llarp
         uint64_t relayOrder,
         const Key_t& addr,
         AbstractContext* ctx,
-        __attribute__((unused)) const Key_t& askpeer)
+        [[maybe_unused]] const Key_t& askpeer)
         : ServiceAddressLookup(TXOwner{ctx->OurKey(), txid}, addr, ctx, relayOrder, nullptr)
         , localPath(pathid)
     {}

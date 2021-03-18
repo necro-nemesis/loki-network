@@ -1,5 +1,5 @@
-#include <config/definition.hpp>
-#include <util/logging/logger.hpp>
+#include "definition.hpp"
+#include <llarp/util/logging/logger.hpp>
 
 #include <iterator>
 #include <sstream>
@@ -39,9 +39,9 @@ namespace llarp
             LogWarn(
                 "*** WARNING: The config option ",
                 opt,
-                (deprecated ? " is deprecated"
-                            : relay ? " is not valid in service node configuration files"
-                                    : " is not valid in client configuration files"),
+                (deprecated  ? " is deprecated"
+                     : relay ? " is not valid in service node configuration files"
+                             : " is not valid in client configuration files"),
                 " and has been ignored.");
           });
     }

@@ -1,9 +1,9 @@
 #ifndef LLARP_DHT_LOCALSERVICEADDRESSLOOKUP
 #define LLARP_DHT_LOCALSERVICEADDRESSLOOKUP
 
-#include <dht/serviceaddresslookup.hpp>
+#include "serviceaddresslookup.hpp"
 
-#include <path/path_types.hpp>
+#include <llarp/path/path_types.hpp>
 
 namespace llarp
 {
@@ -19,7 +19,7 @@ namespace llarp
           uint64_t relayOrder,
           const Key_t& addr,
           AbstractContext* ctx,
-          __attribute__((unused)) const Key_t& askpeer);
+          [[maybe_unused]] const Key_t& askpeer);
 
       void
       SendReply() override;

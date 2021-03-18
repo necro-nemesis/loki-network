@@ -1,13 +1,13 @@
-#include <net/address_info.hpp>
+#include "address_info.hpp"
 #include <stdexcept>
 
 #ifndef _WIN32
 #include <arpa/inet.h>
 #endif
-#include <net/net.hpp>
-#include <util/bencode.h>
-#include <util/mem.h>
-#include <util/printer.hpp>
+#include "net.hpp"
+#include <llarp/util/bencode.h>
+#include <llarp/util/mem.h>
+#include <llarp/util/printer.hpp>
 
 #include <cstring>
 
@@ -158,13 +158,11 @@ namespace llarp
   }
 
   void
-  AddressInfo::fromIpAddress(const IpAddress& address)
+  AddressInfo::fromSockAddr(const SockAddr& addr)
   {
-    SockAddr addr = address.createSockAddr();
     const sockaddr_in6* addr6 = addr;
     memcpy(ip.s6_addr, addr6->sin6_addr.s6_addr, sizeof(ip.s6_addr));
-
-    port = address.getPort().value_or(0);
+    port = addr.getPort();
   }
 
   std::ostream&
@@ -186,10 +184,11 @@ namespace llarp
     char tmp[128] = {0};
     inet_ntop(AF_INET6, (void*)&a.ip, tmp, sizeof(tmp));
 
-    j = nlohmann::json{{"rank", a.rank},
-                       {"dialect", a.dialect},
-                       {"pubkey", a.pubkey.ToString()},
-                       {"in6_addr", tmp},
-                       {"port", a.port}};
+    j = nlohmann::json{
+        {"rank", a.rank},
+        {"dialect", a.dialect},
+        {"pubkey", a.pubkey.ToString()},
+        {"in6_addr", tmp},
+        {"port", a.port}};
   }
 }  // namespace llarp

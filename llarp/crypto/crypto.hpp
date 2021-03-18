@@ -1,10 +1,9 @@
-#ifndef LLARP_CRYPTO_HPP
-#define LLARP_CRYPTO_HPP
+#pragma once
 
-#include <crypto/constants.hpp>
-#include <crypto/types.hpp>
+#include "constants.hpp"
+#include "types.hpp"
 
-#include <util/buffer.hpp>
+#include <llarp/util/buffer.hpp>
 
 #include <functional>
 
@@ -151,6 +150,28 @@ namespace llarp
     }
   };
 
-}  // namespace llarp
+  /// rng type that uses llarp::randint(), which is cryptographically secure
+  struct CSRNG
+  {
+    using result_type = uint64_t;
 
-#endif
+    static constexpr uint64_t
+    min()
+    {
+      return std::numeric_limits<uint64_t>::min();
+    };
+
+    static constexpr uint64_t
+    max()
+    {
+      return std::numeric_limits<uint64_t>::max();
+    };
+
+    uint64_t
+    operator()()
+    {
+      return llarp::randint();
+    };
+  };
+
+}  // namespace llarp

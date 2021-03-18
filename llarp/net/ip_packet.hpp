@@ -1,10 +1,9 @@
-#ifndef LLARP_IP_HPP
-#define LLARP_IP_HPP
+#pragma once
 
-#include <ev/ev.h>
-#include <net/net.hpp>
-#include <util/buffer.hpp>
-#include <util/time.hpp>
+#include <llarp/ev/ev.hpp>
+#include "net.hpp"
+#include <llarp/util/buffer.hpp>
+#include <llarp/util/time.hpp>
 
 #ifndef _WIN32
 // unix, linux
@@ -106,10 +105,8 @@ struct ipv6_header
 };
 
 #include <memory>
-#include <service/protocol_type.hpp>
+#include <llarp/service/protocol_type.hpp>
 #include <utility>
-
-struct llarp_ev_loop;
 
 namespace llarp
 {
@@ -143,25 +140,25 @@ namespace llarp
 
       struct PutTime
       {
-        llarp_ev_loop_ptr loop;
-        PutTime(llarp_ev_loop_ptr evloop) : loop(std::move(evloop))
+        EventLoop_ptr loop;
+        PutTime(EventLoop_ptr evloop) : loop(std::move(evloop))
         {}
         void
         operator()(IPPacket& pkt) const
         {
-          pkt.timestamp = llarp_ev_loop_time_now_ms(loop);
+          pkt.timestamp = loop->time_now();
         }
       };
 
       struct GetNow
       {
-        llarp_ev_loop_ptr loop;
-        GetNow(llarp_ev_loop_ptr evloop) : loop(std::move(evloop))
+        EventLoop_ptr loop;
+        GetNow(EventLoop_ptr evloop) : loop(std::move(evloop))
         {}
         llarp_time_t
         operator()() const
         {
-          return llarp_ev_loop_time_now_ms(loop);
+          return loop->time_now();
         }
       };
 
@@ -254,6 +251,12 @@ namespace llarp
       huint128_t
       dst4to6() const;
 
+      huint128_t
+      src4to6Lan() const;
+
+      huint128_t
+      dst4to6Lan() const;
+
       void
       UpdateIPv4Address(nuint32_t src, nuint32_t dst);
 
@@ -274,7 +277,8 @@ namespace llarp
       MakeICMPUnreachable() const;
     };
 
+    /// generate ip checksum
+    uint16_t
+    ipchksum(const byte_t* buf, size_t sz, uint32_t sum = 0);
   }  // namespace net
 }  // namespace llarp
-
-#endif

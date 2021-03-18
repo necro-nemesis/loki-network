@@ -1,5 +1,4 @@
-#ifndef LOKINET_JNI_COMMON_HPP
-#define LOKINET_JNI_COMMON_HPP
+#pragma once
 
 #include <jni.h>
 #include <string_view>
@@ -26,7 +25,7 @@ VisitStringAsStringView(JNIEnv* env, jobject str, V visit)
   env->ReleaseByteArrayElements(stringJbytes, pBytes, JNI_ABORT);
   env->DeleteLocalRef(stringJbytes);
 
-  return std::move(result);
+  return result;
 }
 
 /// cast jni buffer to T *
@@ -45,7 +44,7 @@ static T*
 FromObjectMember(JNIEnv* env, jobject self, const char* membername)
 {
   jclass cl = env->GetObjectClass(self);
-  jfieldID name = env->GetFieldID(cl, membername, "Ljava/nio/Buffer;");
+  jfieldID name = env->GetFieldID(cl, membername, "Ljava/nio/ByteBuffer;");
   jobject buffer = env->GetObjectField(self, name);
   return FromBuffer<T>(env, buffer);
 }
@@ -78,5 +77,3 @@ GetImpl(JNIEnv* env, jobject self)
 {
   return FromObjectMember<T>(env, self, "impl");
 }
-
-#endif

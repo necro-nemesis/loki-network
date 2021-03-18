@@ -1,11 +1,10 @@
-#ifndef LLARP_AI_HPP
-#define LLARP_AI_HPP
+#pragma once
 
-#include <crypto/types.hpp>
-#include <net/ip_address.hpp>
-#include <net/net.h>
-#include <util/bencode.hpp>
-#include <util/mem.h>
+#include <llarp/crypto/types.hpp>
+#include "ip_address.hpp"
+#include "net.h"
+#include <llarp/util/bencode.hpp>
+#include <llarp/util/mem.h>
 
 #include <string>
 #include <vector>
@@ -44,9 +43,9 @@ namespace llarp
     IpAddress
     toIpAddress() const;
 
-    /// Updates our ip and port to reflact that of the given IpAddress
+    /// Updates our ip and port to reflect that of the given SockAddr
     void
-    fromIpAddress(const IpAddress& address);
+    fromSockAddr(const SockAddr& address);
 
     std::ostream&
     print(std::ostream& stream, int level, int spaces) const;
@@ -77,5 +76,3 @@ namespace llarp
   operator<(const AddressInfo& lhs, const AddressInfo& rhs);
 
 }  // namespace llarp
-
-#endif

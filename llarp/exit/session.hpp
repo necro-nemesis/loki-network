@@ -1,11 +1,10 @@
-#ifndef LLARP_EXIT_SESSION_HPP
-#define LLARP_EXIT_SESSION_HPP
+#pragma once
 
-#include <exit/exit_messages.hpp>
-#include <net/ip_packet.hpp>
-#include <path/pathbuilder.hpp>
-#include <routing/transfer_traffic_message.hpp>
-#include <constants/path.hpp>
+#include "exit_messages.hpp"
+#include <llarp/net/ip_packet.hpp>
+#include <llarp/path/pathbuilder.hpp>
+#include <llarp/routing/transfer_traffic_message.hpp>
+#include <llarp/constants/path.hpp>
 
 #include <deque>
 #include <queue>
@@ -67,13 +66,8 @@ namespace llarp
       bool
       CheckPathDead(path::Path_ptr p, llarp_time_t dlt);
 
-      bool
-      SelectHop(
-          llarp_nodedb* db,
-          const std::set<RouterID>& prev,
-          RouterContact& cur,
-          size_t hop,
-          llarp::path::PathRole roles) override;
+      std::optional<std::vector<RouterContact>>
+      GetHopsForBuild() override;
 
       bool
       ShouldBuildMore(llarp_time_t now) const override;
@@ -230,5 +224,3 @@ namespace llarp
 
   }  // namespace exit
 }  // namespace llarp
-
-#endif

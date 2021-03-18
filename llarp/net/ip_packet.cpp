@@ -1,9 +1,9 @@
-#include <net/ip_packet.hpp>
-#include <net/ip.hpp>
+#include "ip_packet.hpp"
+#include "ip.hpp"
 
-#include <util/buffer.hpp>
-#include <util/endian.hpp>
-#include <util/mem.hpp>
+#include <llarp/util/buffer.hpp>
+#include <llarp/util/endian.hpp>
+#include <llarp/util/mem.hpp>
 
 #ifndef _WIN32
 #include <netinet/in.h>
@@ -112,8 +112,20 @@ namespace llarp
       return ExpandV4(srcv4());
     }
 
-    static uint16_t
-    ipchksum(const byte_t* buf, size_t sz, uint32_t sum = 0)
+    huint128_t
+    IPPacket::dst4to6Lan() const
+    {
+      return ExpandV4Lan(dstv4());
+    }
+
+    huint128_t
+    IPPacket::src4to6Lan() const
+    {
+      return ExpandV4Lan(srcv4());
+    }
+
+    uint16_t
+    ipchksum(const byte_t* buf, size_t sz, uint32_t sum)
     {
       while (sz > 1)
       {
@@ -462,7 +474,7 @@ namespace llarp
       }
       else if (IsV6())
       {
-        UpdateIPv6Address({0}, {ntoh128(dstv6().h)}, flowlabel);
+        UpdateIPv6Address({0}, dstv6(), flowlabel);
       }
     }
 

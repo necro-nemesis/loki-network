@@ -1,10 +1,10 @@
-#include <service/context.hpp>
+#include "context.hpp"
 
-#include <handlers/null.hpp>
-#include <handlers/tun.hpp>
-#include <nodedb.hpp>
-#include <router/abstractrouter.hpp>
-#include <service/endpoint.hpp>
+#include <llarp/handlers/null.hpp>
+#include <llarp/handlers/tun.hpp>
+#include <llarp/nodedb.hpp>
+#include <llarp/router/abstractrouter.hpp>
+#include "endpoint.hpp"
 #include <stdexcept>
 
 namespace llarp
@@ -20,15 +20,15 @@ namespace llarp
       static EndpointConstructors endpointConstructors = {
           {"tun",
            [](AbstractRouter* r, service::Context* c) {
-             return std::make_shared<handlers::TunEndpoint>(r, c, false);
+             return std::make_shared<handlers::TunEndpoint>(r, c);
            }},
           {"android",
            [](AbstractRouter* r, service::Context* c) {
-             return std::make_shared<handlers::TunEndpoint>(r, c, true);
+             return std::make_shared<handlers::TunEndpoint>(r, c);
            }},
           {"ios",
            [](AbstractRouter* r, service::Context* c) {
-             return std::make_shared<handlers::TunEndpoint>(r, c, true);
+             return std::make_shared<handlers::TunEndpoint>(r, c);
            }},
           {"null", [](AbstractRouter* r, service::Context* c) {
              return std::make_shared<handlers::NullEndpoint>(r, c);

@@ -1,7 +1,7 @@
-#include <iwp/iwp.hpp>
-#include <iwp/linklayer.hpp>
+#include "iwp.hpp"
+#include "linklayer.hpp"
 #include <memory>
-#include <router/abstractrouter.hpp>
+#include <llarp/router/abstractrouter.hpp>
 
 namespace llarp
 {
@@ -10,6 +10,7 @@ namespace llarp
     LinkLayer_ptr
     NewInboundLink(
         std::shared_ptr<KeyManager> keyManager,
+        std::shared_ptr<EventLoop> loop,
         GetRCFunc getrc,
         LinkMessageHandler h,
         SignBufferFunc sign,
@@ -22,12 +23,25 @@ namespace llarp
         WorkerFunc_t work)
     {
       return std::make_shared<LinkLayer>(
-          keyManager, getrc, h, sign, before, est, reneg, timeout, closed, pumpDone, work, true);
+          keyManager,
+          loop,
+          getrc,
+          h,
+          sign,
+          before,
+          est,
+          reneg,
+          timeout,
+          closed,
+          pumpDone,
+          work,
+          true);
     }
 
     LinkLayer_ptr
     NewOutboundLink(
         std::shared_ptr<KeyManager> keyManager,
+        std::shared_ptr<EventLoop> loop,
         GetRCFunc getrc,
         LinkMessageHandler h,
         SignBufferFunc sign,
@@ -40,7 +54,19 @@ namespace llarp
         WorkerFunc_t work)
     {
       return std::make_shared<LinkLayer>(
-          keyManager, getrc, h, sign, before, est, reneg, timeout, closed, pumpDone, work, false);
+          keyManager,
+          loop,
+          getrc,
+          h,
+          sign,
+          before,
+          est,
+          reneg,
+          timeout,
+          closed,
+          pumpDone,
+          work,
+          false);
     }
   }  // namespace iwp
 }  // namespace llarp

@@ -1,39 +1,25 @@
-#ifndef LLARP_SERVICE_ENDPOINT_STATE_HPP
-#define LLARP_SERVICE_ENDPOINT_STATE_HPP
+#pragma once
 
-#include <hook/ihook.hpp>
-#include <router_id.hpp>
-#include <service/address.hpp>
-#include <service/pendingbuffer.hpp>
-#include <service/router_lookup_job.hpp>
-#include <service/session.hpp>
-#include <service/endpoint_types.hpp>
-#include <util/compare_ptr.hpp>
-#include <util/decaying_hashtable.hpp>
-#include <util/status.hpp>
+#include <llarp/hook/ihook.hpp>
+#include <llarp/router_id.hpp>
+#include "address.hpp"
+#include "pendingbuffer.hpp"
+#include "router_lookup_job.hpp"
+#include "session.hpp"
+#include "endpoint_types.hpp"
+#include <llarp/util/compare_ptr.hpp>
+#include <llarp/util/decaying_hashtable.hpp>
+#include <llarp/util/status.hpp>
 
 #include <memory>
 #include <queue>
 #include <set>
 #include <unordered_map>
 
-struct llarp_ev_loop;
-using llarp_ev_loop_ptr = std::shared_ptr<llarp_ev_loop>;
-
 namespace llarp
 {
-  // clang-format off
-  namespace exit { struct BaseSession; }
-  namespace path { struct Path; using Path_ptr = std::shared_ptr< Path >; }
-  namespace routing { struct PathTransferMessage; }
-  // clang-format on
-
   namespace service
   {
-    struct IServiceLookup;
-    struct OutboundContext;
-    struct Endpoint;
-
     struct EndpointState
     {
       hooks::Backend_ptr m_OnUp;
@@ -43,8 +29,6 @@ namespace llarp
       std::set<RouterID> m_SnodeBlacklist;
 
       AbstractRouter* m_Router;
-      std::shared_ptr<Logic> m_IsolatedLogic = nullptr;
-      llarp_ev_loop_ptr m_IsolatedNetLoop = nullptr;
       std::string m_Keyfile;
       std::string m_Name;
       std::string m_NetNS;
@@ -90,5 +74,3 @@ namespace llarp
     };
   }  // namespace service
 }  // namespace llarp
-
-#endif

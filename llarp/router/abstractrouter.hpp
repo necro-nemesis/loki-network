@@ -1,36 +1,33 @@
-#ifndef LLARP_ABSTRACT_ROUTER_HPP
-#define LLARP_ABSTRACT_ROUTER_HPP
+#pragma once
 
-#include <config/config.hpp>
-#include <config/key_manager.hpp>
+#include <llarp/config/config.hpp>
+#include <llarp/config/key_manager.hpp>
 #include <memory>
-#include <util/types.hpp>
-#include <util/status.hpp>
-#include <router/i_outbound_message_handler.hpp>
+#include <llarp/util/types.hpp>
+#include <llarp/util/status.hpp>
+#include "i_outbound_message_handler.hpp"
 #include <vector>
-#include <ev/ev.h>
+#include <llarp/ev/ev.hpp>
 #include <functional>
-#include <router_contact.hpp>
-#include <tooling/router_event.hpp>
-#include <peerstats/peer_db.hpp>
+#include <llarp/router_contact.hpp>
+#include <llarp/tooling/router_event.hpp>
+#include <llarp/peerstats/peer_db.hpp>
 
 #ifdef LOKINET_HIVE
-#include "tooling/router_event.hpp"
+#include <llarp/tooling/router_event.hpp>
 #endif
 
 struct llarp_buffer_t;
 struct llarp_dht_context;
-struct llarp_nodedb;
-struct llarp_threadpool;
 
-namespace lokimq
+namespace oxenmq
 {
-  class LokiMQ;
+  class OxenMQ;
 }
 
 namespace llarp
 {
-  class Logic;
+  class NodeDB;
   struct Config;
   struct RouterID;
   struct ILinkMessage;
@@ -75,9 +72,14 @@ namespace llarp
     class ThreadPool;
   }
 
-  using LMQ_ptr = std::shared_ptr<lokimq::LokiMQ>;
+  namespace vpn
+  {
+    class Platform;
+  }
 
-  struct AbstractRouter
+  using LMQ_ptr = std::shared_ptr<oxenmq::OxenMQ>;
+
+  struct AbstractRouter : public std::enable_shared_from_this<AbstractRouter>
   {
 #ifdef LOKINET_HIVE
     tooling::RouterHive* hive = nullptr;
@@ -88,19 +90,19 @@ namespace llarp
     virtual bool
     HandleRecvLinkMessageBuffer(ILinkSession* from, const llarp_buffer_t& msg) = 0;
 
-    virtual LMQ_ptr
+    virtual const LMQ_ptr&
     lmq() const = 0;
 
-    virtual std::shared_ptr<rpc::LokidRpcClient>
-    RpcClient() const = 0;
+    virtual vpn::Platform*
+    GetVPNPlatform() const = 0;
 
-    virtual std::shared_ptr<Logic>
-    logic() const = 0;
+    virtual const std::shared_ptr<rpc::LokidRpcClient>&
+    RpcClient() const = 0;
 
     virtual llarp_dht_context*
     dht() const = 0;
 
-    virtual llarp_nodedb*
+    virtual const std::shared_ptr<NodeDB>&
     nodedb() const = 0;
 
     virtual const path::PathContext&
@@ -115,7 +117,7 @@ namespace llarp
     virtual exit::Context&
     exitContext() = 0;
 
-    virtual std::shared_ptr<KeyManager>
+    virtual const std::shared_ptr<KeyManager>&
     keyManager() const = 0;
 
     virtual const SecretKey&
@@ -127,8 +129,8 @@ namespace llarp
     virtual Profiling&
     routerProfiling() = 0;
 
-    virtual llarp_ev_loop_ptr
-    netloop() const = 0;
+    virtual const EventLoop_ptr&
+    loop() const = 0;
 
     /// call function in crypto worker
     virtual void QueueWork(std::function<void(void)>) = 0;
@@ -170,7 +172,7 @@ namespace llarp
     Sign(Signature& sig, const llarp_buffer_t& buf) const = 0;
 
     virtual bool
-    Configure(std::shared_ptr<Config> conf, bool isRouter, llarp_nodedb* nodedb) = 0;
+    Configure(std::shared_ptr<Config> conf, bool isRouter, std::shared_ptr<NodeDB> nodedb) = 0;
 
     virtual bool
     IsServiceNode() const = 0;
@@ -190,6 +192,10 @@ namespace llarp
     /// stop running the router logic gracefully
     virtual void
     Stop() = 0;
+
+    /// thaw from long sleep or network changed event
+    virtual void
+    Thaw() = 0;
 
     /// non gracefully stop the router
     virtual void
@@ -307,6 +313,11 @@ namespace llarp
       HandleRouterEvent(std::move(event));
     }
 
+#if defined(ANDROID)
+    virtual int
+    GetOutboundUDPSocket() const = 0;
+#endif
+
    protected:
     /// Virtual function to handle RouterEvent. HiveRouter overrides this in
     /// order to inject the event. The default implementation in Router simply
@@ -315,5 +326,3 @@ namespace llarp
     HandleRouterEvent(tooling::RouterEventPtr event) const = 0;
   };
 }  // namespace llarp
-
-#endif

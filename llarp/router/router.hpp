@@ -1,42 +1,40 @@
-#ifndef LLARP_ROUTER_HPP
-#define LLARP_ROUTER_HPP
+#pragma once
 
-#include <router/abstractrouter.hpp>
+#include "abstractrouter.hpp"
 
-#include <bootstrap.hpp>
-#include <config/config.hpp>
-#include <config/key_manager.hpp>
-#include <constants/link_layer.hpp>
-#include <crypto/types.hpp>
-#include <ev/ev.h>
-#include <exit/context.hpp>
-#include <handlers/tun.hpp>
-#include <link/link_manager.hpp>
-#include <link/server.hpp>
-#include <messages/link_message_parser.hpp>
-#include <nodedb.hpp>
-#include <path/path_context.hpp>
-#include <peerstats/peer_db.hpp>
-#include <profiling.hpp>
-#include <router_contact.hpp>
-#include <router/outbound_message_handler.hpp>
-#include <router/outbound_session_maker.hpp>
-#include <router/rc_gossiper.hpp>
-#include <router/rc_lookup_handler.hpp>
-#include <router/route_poker.hpp>
-#include <routing/handler.hpp>
-#include <routing/message_parser.hpp>
-#include <rpc/lokid_rpc_client.hpp>
-#include <rpc/rpc_server.hpp>
-#include <service/context.hpp>
+#include <llarp/bootstrap.hpp>
+#include <llarp/config/config.hpp>
+#include <llarp/config/key_manager.hpp>
+#include <llarp/constants/link_layer.hpp>
+#include <llarp/crypto/types.hpp>
+#include <llarp/ev/ev.hpp>
+#include <llarp/exit/context.hpp>
+#include <llarp/handlers/tun.hpp>
+#include <llarp/link/link_manager.hpp>
+#include <llarp/link/server.hpp>
+#include <llarp/messages/link_message_parser.hpp>
+#include <llarp/nodedb.hpp>
+#include <llarp/path/path_context.hpp>
+#include <llarp/peerstats/peer_db.hpp>
+#include <llarp/profiling.hpp>
+#include <llarp/router_contact.hpp>
+#include "outbound_message_handler.hpp"
+#include "outbound_session_maker.hpp"
+#include "rc_gossiper.hpp"
+#include "rc_lookup_handler.hpp"
+#include "route_poker.hpp"
+#include <llarp/routing/handler.hpp>
+#include <llarp/routing/message_parser.hpp>
+#include <llarp/rpc/lokid_rpc_client.hpp>
+#include <llarp/rpc/rpc_server.hpp>
+#include <llarp/service/context.hpp>
 #include <stdexcept>
-#include <util/buffer.hpp>
-#include <util/fs.hpp>
-#include <util/mem.hpp>
-#include <util/status.hpp>
-#include <util/str.hpp>
-#include <util/thread/logic.hpp>
-#include <util/time.hpp>
+#include <llarp/util/buffer.hpp>
+#include <llarp/util/fs.hpp>
+#include <llarp/util/mem.hpp>
+#include <llarp/util/status.hpp>
+#include <llarp/util/str.hpp>
+#include <llarp/util/time.hpp>
 
 #include <functional>
 #include <list>
@@ -46,7 +44,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include <lokimq/address.h>
+#include <oxenmq/address.h>
 
 namespace llarp
 {
@@ -76,22 +74,16 @@ namespace llarp
 
     LMQ_ptr m_lmq;
 
-    LMQ_ptr
+    const LMQ_ptr&
     lmq() const override
     {
       return m_lmq;
     }
 
-    std::shared_ptr<rpc::LokidRpcClient>
+    const std::shared_ptr<rpc::LokidRpcClient>&
     RpcClient() const override
     {
       return m_lokidRpcClient;
-    }
-
-    std::shared_ptr<Logic>
-    logic() const override
-    {
-      return _logic;
     }
 
     llarp_dht_context*
@@ -103,7 +95,7 @@ namespace llarp
     util::StatusObject
     ExtractStatus() const override;
 
-    llarp_nodedb*
+    const std::shared_ptr<NodeDB>&
     nodedb() const override
     {
       return _nodedb;
@@ -136,7 +128,7 @@ namespace llarp
       return _exitContext;
     }
 
-    std::shared_ptr<KeyManager>
+    const std::shared_ptr<KeyManager>&
     keyManager() const override
     {
       return m_keyManager;
@@ -160,10 +152,16 @@ namespace llarp
       return _routerProfiling;
     }
 
-    llarp_ev_loop_ptr
-    netloop() const override
+    const EventLoop_ptr&
+    loop() const override
     {
-      return _netloop;
+      return _loop;
+    }
+
+    vpn::Platform*
+    GetVPNPlatform() const override
+    {
+      return _vpnPlatform.get();
     }
 
     void
@@ -172,18 +170,18 @@ namespace llarp
     void
     QueueDiskIO(std::function<void(void)> func) override;
 
-    IpAddress _ourAddress;
+    std::optional<SockAddr> _ourAddress;
 
-    llarp_ev_loop_ptr _netloop;
-    std::shared_ptr<Logic> _logic;
+    EventLoop_ptr _loop;
+    std::shared_ptr<vpn::Platform> _vpnPlatform;
     path::PathContext paths;
     exit::Context _exitContext;
     SecretKey _identity;
     SecretKey _encryption;
     llarp_dht_context* _dht = nullptr;
-    llarp_nodedb* _nodedb;
+    std::shared_ptr<NodeDB> _nodedb;
     llarp_time_t _startedAt;
-    const lokimq::TaggedThreadID m_DiskThread;
+    const oxenmq::TaggedThreadID m_DiskThread;
 
     llarp_time_t
     Uptime() const override;
@@ -198,8 +196,6 @@ namespace llarp
 
     // should we be sending padded messages every interval?
     bool sendPadding = false;
-
-    uint32_t ticker_job_id = 0;
 
     LinkMessageParser inbound_link_msg_parser;
     routing::InboundMessageParser inbound_routing_msg_parser;
@@ -263,16 +259,16 @@ namespace llarp
     void
     PumpLL() override;
 
-    const lokimq::address DefaultRPCBindAddr = lokimq::address::tcp("127.0.0.1", 1190);
+    const oxenmq::address DefaultRPCBindAddr = oxenmq::address::tcp("127.0.0.1", 1190);
     bool enableRPCServer = false;
-    lokimq::address rpcBindAddr = DefaultRPCBindAddr;
+    oxenmq::address rpcBindAddr = DefaultRPCBindAddr;
     std::unique_ptr<rpc::RpcServer> m_RPCServer;
 
     const llarp_time_t _randomStartDelay;
 
     std::shared_ptr<rpc::LokidRpcClient> m_lokidRpcClient;
 
-    lokimq::address lokidRPCAddr;
+    oxenmq::address lokidRPCAddr;
     Profiling _routerProfiling;
     fs::path _profilesFile;
     OutboundMessageHandler _outboundMessageHandler;
@@ -319,9 +315,9 @@ namespace llarp
     void
     GossipRCIfNeeded(const RouterContact rc) override;
 
-    explicit Router(llarp_ev_loop_ptr __netloop, std::shared_ptr<Logic> logic);
+    explicit Router(EventLoop_ptr loop, std::shared_ptr<vpn::Platform> vpnPlatform);
 
-    virtual ~Router() override;
+    ~Router() override;
 
     bool
     HandleRecvLinkMessageBuffer(ILinkSession* from, const llarp_buffer_t& msg) override;
@@ -348,10 +344,13 @@ namespace llarp
     Close();
 
     bool
-    Configure(std::shared_ptr<Config> conf, bool isRouter, llarp_nodedb* nodedb = nullptr) override;
+    Configure(std::shared_ptr<Config> conf, bool isRouter, std::shared_ptr<NodeDB> nodedb) override;
 
     bool
     StartRpcServer() override;
+
+    void
+    Thaw() override;
 
     bool
     Run() override;
@@ -449,10 +448,6 @@ namespace llarp
       return llarp::time_now_ms();
     }
 
-    /// schedule ticker to call i ms from now
-    void
-    ScheduleTicker(llarp_time_t i = 1s);
-
     /// parse a routing message in a buffer and handle it with a handler if
     /// successful parsing return true on parse and handle success otherwise
     /// return false
@@ -490,9 +485,6 @@ namespace llarp
     NextPathBuildNumber() override;
 
     void
-    handle_router_ticker();
-
-    void
     AfterStopLinks();
 
     void
@@ -505,6 +497,16 @@ namespace llarp
     {
       return m_Config;
     }
+
+#if defined(ANDROID)
+    int m_OutboundUDPSocket = -1;
+
+    int
+    GetOutboundUDPSocket() const override
+    {
+      return m_OutboundUDPSocket;
+    }
+#endif
 
    private:
     std::atomic<bool> _stopping;
@@ -546,5 +548,3 @@ namespace llarp
   };
 
 }  // namespace llarp
-
-#endif

@@ -1,6 +1,6 @@
-#include <net/ip_address.hpp>
+#include "ip_address.hpp"
 
-#include <net/net.hpp>
+#include "net.hpp"
 
 namespace llarp
 {
@@ -158,6 +158,14 @@ namespace llarp
   {
     huint32_t ip;
     ip.FromString(toHost());
+    return ip;
+  }
+
+  huint128_t
+  IpAddress::toIP6() const
+  {
+    huint128_t ip;
+    ip.FromString(m_ipAddress);
     return ip;
   }
 

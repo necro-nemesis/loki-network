@@ -1,9 +1,8 @@
-#ifndef LLARP_HANDLERS_EXIT_HPP
-#define LLARP_HANDLERS_EXIT_HPP
+#pragma once
 
-#include <exit/endpoint.hpp>
-#include <handlers/tun.hpp>
-#include <dns/server.hpp>
+#include <llarp/exit/endpoint.hpp>
+#include "tun.hpp"
+#include <llarp/dns/server.hpp>
 #include <unordered_map>
 
 namespace llarp
@@ -13,7 +12,7 @@ namespace llarp
   {
     struct ExitEndpoint : public dns::IQueryHandler
     {
-      ExitEndpoint(const std::string& name, AbstractRouter* r);
+      ExitEndpoint(std::string name, AbstractRouter* r);
       ~ExitEndpoint() override;
 
       void
@@ -54,7 +53,7 @@ namespace llarp
 
       /// handle ip packet from outside
       void
-      OnInetPacket(std::vector<byte_t> buf);
+      OnInetPacket(net::IPPacket buf);
 
       AbstractRouter*
       GetRouter();
@@ -84,7 +83,7 @@ namespace llarp
       RemoveExit(const exit::Endpoint* ep);
 
       bool
-      QueueOutboundTraffic(const llarp_buffer_t& buf);
+      QueueOutboundTraffic(net::IPPacket pkt);
 
       /// sets up networking and starts traffic
       bool
@@ -161,10 +160,11 @@ namespace llarp
 
       huint128_t m_NextAddr;
       IPRange m_OurRange;
+      std::string m_ifname;
 
       std::unordered_map<huint128_t, llarp_time_t> m_IPActivity;
 
-      llarp_tun_io m_Tun;
+      std::shared_ptr<vpn::NetworkInterface> m_NetIf;
 
       IpAddress m_LocalResolverAddr;
       std::vector<IpAddress> m_UpstreamResolvers;
@@ -185,4 +185,3 @@ namespace llarp
     };
   }  // namespace handlers
 }  // namespace llarp
-#endif

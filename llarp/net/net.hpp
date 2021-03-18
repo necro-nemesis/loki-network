@@ -1,14 +1,13 @@
-#ifndef LLARP_NET_HPP
-#define LLARP_NET_HPP
+#pragma once
 
-#include <net/uint128.hpp>
-#include <net/address_info.hpp>
-#include <net/ip_address.hpp>
-#include <net/net_int.hpp>
-#include <net/net.h>
-#include <net/ip_range.hpp>
-#include <util/mem.hpp>
-#include <util/bits.hpp>
+#include "uint128.hpp"
+#include "address_info.hpp"
+#include "ip_address.hpp"
+#include "net_int.hpp"
+#include "net.h"
+#include "ip_range.hpp"
+#include <llarp/util/mem.hpp>
+#include <llarp/util/bits.hpp>
 
 #include <functional>
 #include <cstdlib>  // for itoa
@@ -24,6 +23,10 @@
 #include <ws2tcpip.h>
 #include <wspiapi.h>
 #define inet_aton(x, y) inet_pton(AF_INET, x, y)
+#endif
+
+#ifndef _WIN32
+#include <arpa/inet.h>
 #endif
 
 bool
@@ -59,7 +62,7 @@ namespace llarp
   IsBogonRange(const in6_addr& host, const in6_addr& mask);
 
   bool
-  AllInterfaces(int af, IpAddress& addr);
+  AllInterfaces(int af, SockAddr& addr);
 
   /// get first network interface with public address
   bool
@@ -74,9 +77,19 @@ namespace llarp
   FindFreeTun();
 
   /// get network interface address for network interface with ifname
-  std::optional<IpAddress>
-  GetIFAddr(const std::string& ifname, int af = AF_INET);
+  std::optional<SockAddr>
+  GetInterfaceAddr(const std::string& ifname, int af = AF_INET);
+
+  /// get an interface's ip6 address
+  std::optional<huint128_t>
+  GetInterfaceIPv6Address(std::string ifname);
+
+#ifdef _WIN32
+  namespace net
+  {
+    std::optional<int>
+    GetInterfaceIndex(huint32_t ip);
+  }
+#endif
 
 }  // namespace llarp
-
-#endif

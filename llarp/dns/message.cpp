@@ -1,12 +1,12 @@
-#include <dns/message.hpp>
+#include "message.hpp"
 
-#include <dns/dns.hpp>
-#include <dns/srv_data.hpp>
-#include <util/buffer.hpp>
-#include <util/endian.hpp>
-#include <util/logging/logger.hpp>
-#include <util/printer.hpp>
-#include <net/ip.hpp>
+#include "dns.hpp"
+#include "srv_data.hpp"
+#include <llarp/util/buffer.hpp>
+#include <llarp/util/endian.hpp>
+#include <llarp/util/logging/logger.hpp>
+#include <llarp/util/printer.hpp>
+#include <llarp/net/ip.hpp>
 
 #include <array>
 
@@ -120,6 +120,16 @@ namespace llarp
         }
       }
       return true;
+    }
+
+    OwnedBuffer
+    Message::ToBuffer() const
+    {
+      std::array<byte_t, 1500> tmp;
+      llarp_buffer_t buf{tmp};
+      if (not Encode(&buf))
+        throw std::runtime_error("cannot encode dns message");
+      return OwnedBuffer::copy_used(buf);
     }
 
     void Message::AddServFail(RR_TTL_t)

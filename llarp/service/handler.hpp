@@ -1,10 +1,9 @@
-#ifndef LLARP_SERVICE_HANDLER_HPP
-#define LLARP_SERVICE_HANDLER_HPP
+#pragma once
 
-#include <crypto/types.hpp>
-#include <path/path.hpp>
-#include <service/intro_set.hpp>
-#include <util/aligned.hpp>
+#include <llarp/crypto/types.hpp>
+#include <llarp/path/path.hpp>
+#include "intro_set.hpp"
+#include <llarp/util/aligned.hpp>
 
 #include <memory>
 #include <set>
@@ -81,4 +80,16 @@ namespace llarp
   }  // namespace service
 }  // namespace llarp
 
-#endif
+namespace std
+{
+  template <>
+  struct hash<llarp::service::ConvoTag>
+  {
+    size_t
+    operator()(const llarp::service::ConvoTag& tag) const
+    {
+      std::hash<std::string_view> h{};
+      return h(std::string_view{reinterpret_cast<const char*>(tag.data()), tag.size()});
+    }
+  };
+}  // namespace std

@@ -1,10 +1,10 @@
-#include <lokimq/lokimq.h>
+#include <oxenmq/oxenmq.h>
 #include <nlohmann/json.hpp>
 #include <cxxopts.hpp>
 #include <future>
 #include <vector>
 #include <array>
-#include <net/net.hpp>
+#include <llarp/net/net.hpp>
 
 #ifdef _WIN32
 // add the unholy windows headers for iphlpapi
@@ -16,12 +16,12 @@
 #include <sys/wait.h>
 #endif
 
-/// do a lokimq request on an lmq instance blocking style
+/// do a oxenmq request on an lmq instance blocking style
 /// returns a json object parsed from the result
 std::optional<nlohmann::json>
 LMQ_Request(
-    lokimq::LokiMQ& lmq,
-    const lokimq::ConnectionID& id,
+    oxenmq::OxenMQ& lmq,
+    const oxenmq::ConnectionID& id,
     std::string_view method,
     std::optional<nlohmann::json> args = std::nullopt)
 {
@@ -68,13 +68,15 @@ main(int argc, char* argv[])
     ("token", "exit auth token to use", cxxopts::value<std::string>())
     ("auth", "exit auth token to use", cxxopts::value<std::string>())
     ("status", "print status and exit", cxxopts::value<bool>())
+    ("range", "ip range to map", cxxopts::value<std::string>())
     ;
   // clang-format on
-  lokimq::address rpcURL("tcp://127.0.0.1:1190");
+  oxenmq::address rpcURL("tcp://127.0.0.1:1190");
   std::string exitAddress;
   std::string endpoint = "default";
   std::optional<std::string> token;
-  lokimq::LogLevel logLevel = lokimq::LogLevel::warn;
+  std::string range = "::/0";
+  oxenmq::LogLevel logLevel = oxenmq::LogLevel::warn;
   bool goUp = false;
   bool goDown = false;
   bool printStatus = false;
@@ -91,11 +93,11 @@ main(int argc, char* argv[])
 
     if (result.count("verbose") > 0)
     {
-      logLevel = lokimq::LogLevel::debug;
+      logLevel = oxenmq::LogLevel::debug;
     }
     if (result.count("rpc") > 0)
     {
-      rpcURL = lokimq::address(result["rpc"].as<std::string>());
+      rpcURL = oxenmq::address(result["rpc"].as<std::string>());
     }
     if (result.count("exit") > 0)
     {
@@ -117,6 +119,10 @@ main(int argc, char* argv[])
     if (result.count("auth") > 0)
     {
       token = result["auth"].as<std::string>();
+    }
+    if (result.count("range") > 0)
+    {
+      range = result["range"].as<std::string>();
     }
   }
   catch (const cxxopts::option_not_exists_exception& ex)
@@ -141,10 +147,11 @@ main(int argc, char* argv[])
     return 1;
   }
 
-  lokimq::LokiMQ lmq{[](lokimq::LogLevel lvl, const char* file, int line, std::string msg) {
-                       std::cout << lvl << " [" << file << ":" << line << "] " << msg << std::endl;
-                     },
-                     logLevel};
+  oxenmq::OxenMQ lmq{
+      [](oxenmq::LogLevel lvl, const char* file, int line, std::string msg) {
+        std::cout << lvl << " [" << file << ":" << line << "] " << msg << std::endl;
+      },
+      logLevel};
 
   lmq.start();
 
@@ -216,12 +223,12 @@ main(int argc, char* argv[])
           lmq,
           connID,
           "llarp.exit",
-          nlohmann::json{{"exit", exitAddress}, {"range", "0.0.0.0/0"}, {"token", *token}});
+          nlohmann::json{{"exit", exitAddress}, {"range", range}, {"token", *token}});
     }
     else
     {
       maybe_result = LMQ_Request(
-          lmq, connID, "llarp.exit", nlohmann::json{{"exit", exitAddress}, {"range", "0.0.0.0/0"}});
+          lmq, connID, "llarp.exit", nlohmann::json{{"exit", exitAddress}, {"range", range}});
     }
 
     if (not maybe_result.has_value())
@@ -238,7 +245,7 @@ main(int argc, char* argv[])
   }
   if (goDown)
   {
-    LMQ_Request(lmq, connID, "llarp.exit", nlohmann::json{{"range", "0.0.0.0/0"}, {"unmap", true}});
+    LMQ_Request(lmq, connID, "llarp.exit", nlohmann::json{{"range", range}, {"unmap", true}});
   }
 
   return 0;

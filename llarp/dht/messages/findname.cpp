@@ -1,11 +1,11 @@
-#include <dht/messages/findname.hpp>
-#include <lokimq/bt_serialize.h>
-#include <dht/context.hpp>
-#include <dht/messages/gotname.hpp>
-#include <router/abstractrouter.hpp>
-#include <rpc/lokid_rpc_client.hpp>
-#include <path/path_context.hpp>
-#include <routing/dht_message.hpp>
+#include "findname.hpp"
+#include <oxenmq/bt_serialize.h>
+#include <llarp/dht/context.hpp>
+#include "gotname.hpp"
+#include <llarp/router/abstractrouter.hpp>
+#include <llarp/rpc/lokid_rpc_client.hpp>
+#include <llarp/path/path_context.hpp>
+#include <llarp/routing/dht_message.hpp>
 
 namespace llarp::dht
 {
@@ -16,10 +16,10 @@ namespace llarp::dht
   bool
   FindNameMessage::BEncode(llarp_buffer_t* buf) const
   {
-    const auto data = lokimq::bt_serialize(
-        lokimq::bt_dict{{"A", "N"sv},
-                        {"H", std::string_view{(char*)NameHash.data(), NameHash.size()}},
-                        {"T", TxID}});
+    const auto data = oxenmq::bt_serialize(oxenmq::bt_dict{
+        {"A", "N"sv},
+        {"H", std::string_view{(char*)NameHash.data(), NameHash.size()}},
+        {"T", TxID}});
     return buf->write(data.begin(), data.end());
   }
 

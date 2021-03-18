@@ -1,15 +1,10 @@
-#ifndef LLARP_SERVICE_TAG_HPP
-#define LLARP_SERVICE_TAG_HPP
+#pragma once
 
-#include <dht/key.hpp>
-#include <util/aligned.hpp>
-#include <util/status.hpp>
+#include <llarp/dht/key.hpp>
+#include <llarp/util/aligned.hpp>
+#include <llarp/util/status.hpp>
 
 #include <sodium/crypto_generichash.h>
-
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
 
 namespace llarp
 {
@@ -59,5 +54,3 @@ namespace llarp
     };
   }  // namespace service
 }  // namespace llarp
-
-#endif

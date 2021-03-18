@@ -1,8 +1,7 @@
-#ifndef LLARP_ROUTER_ID_HPP
-#define LLARP_ROUTER_ID_HPP
+#pragma once
 
-#include <util/aligned.hpp>
-#include <util/status.hpp>
+#include "util/aligned.hpp"
+#include "util/status.hpp"
 
 namespace llarp
 {
@@ -57,4 +56,16 @@ namespace llarp
 
 }  // namespace llarp
 
-#endif
+namespace std
+{
+  template <>
+  struct hash<llarp::RouterID>
+  {
+    size_t
+    operator()(const llarp::RouterID& id) const
+    {
+      const llarp::RouterID::Hash h{};
+      return h(id);
+    }
+  };
+}  // namespace std

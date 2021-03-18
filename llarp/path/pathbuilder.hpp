@@ -1,8 +1,7 @@
-#ifndef LLARP_PATHBUILDER_HPP
-#define LLARP_PATHBUILDER_HPP
+#pragma once
 
-#include <path/pathset.hpp>
-#include <util/status.hpp>
+#include "pathset.hpp"
+#include <llarp/util/status.hpp>
 
 #include <atomic>
 #include <set>
@@ -30,12 +29,6 @@ namespace llarp
       void
       DoPathBuildBackoff();
 
-      bool
-      DoUrgentBuildAlignedTo(const RouterID remote, std::vector<RouterContact>& hops);
-
-      bool
-      DoBuildAlignedTo(const RouterID remote, std::vector<RouterContact>& hops);
-
      public:
       AbstractRouter* m_router;
       SecretKey enckey;
@@ -50,14 +43,6 @@ namespace llarp
 
       util::StatusObject
       ExtractStatus() const;
-
-      bool
-      SelectHop(
-          llarp_nodedb* db,
-          const std::set<RouterID>& prev,
-          RouterContact& cur,
-          size_t hop,
-          PathRole roles) override;
 
       bool
       ShouldBuildMore(llarp_time_t now) const override;
@@ -107,11 +92,18 @@ namespace llarp
       bool
       BuildOneAlignedTo(const RouterID endpoint) override;
 
-      void
-      Build(const std::vector<RouterContact>& hops, PathRole roles = ePathRoleAny) override;
+      std::optional<std::vector<RouterContact>>
+      GetHopsAlignedToForBuild(RouterID endpoint, const std::set<RouterID>& exclude = {});
 
-      bool
-      SelectHops(llarp_nodedb* db, std::vector<RouterContact>& hops, PathRole roles = ePathRoleAny);
+      void
+      Build(std::vector<RouterContact> hops, PathRole roles = ePathRoleAny) override;
+
+      /// pick a first hop
+      std::optional<RouterContact>
+      SelectFirstHop(const std::set<RouterID>& exclude = {}) const;
+
+      virtual std::optional<std::vector<RouterContact>>
+      GetHopsForBuild() override;
 
       void
       ManualRebuild(size_t N, PathRole roles = ePathRoleAny);
@@ -134,4 +126,3 @@ namespace llarp
   }  // namespace path
 
 }  // namespace llarp
-#endif

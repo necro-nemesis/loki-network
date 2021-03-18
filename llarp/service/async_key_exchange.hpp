@@ -1,19 +1,16 @@
-#ifndef LLARP_SERVICE_ASYNC_KEY_EXCHANGE_HPP
-#define LLARP_SERVICE_ASYNC_KEY_EXCHANGE_HPP
+#pragma once
 
-#include <crypto/types.hpp>
-#include <service/identity.hpp>
-#include <service/protocol.hpp>
+#include <llarp/crypto/types.hpp>
+#include "identity.hpp"
+#include "protocol.hpp"
 
 namespace llarp
 {
-  class Logic;
-
   namespace service
   {
     struct AsyncKeyExchange : public std::enable_shared_from_this<AsyncKeyExchange>
     {
-      std::shared_ptr<Logic> logic;
+      EventLoop_ptr loop;
       SharedSecret sharedKey;
       ServiceInfo m_remote;
       const Identity& m_LocalIdentity;
@@ -26,7 +23,7 @@ namespace llarp
       ConvoTag tag;
 
       AsyncKeyExchange(
-          std::shared_ptr<Logic> l,
+          EventLoop_ptr l,
           ServiceInfo r,
           const Identity& localident,
           const PQPubKey& introsetPubKey,
@@ -45,5 +42,3 @@ namespace llarp
 
   }  // namespace service
 }  // namespace llarp
-
-#endif
